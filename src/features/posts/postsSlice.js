@@ -31,9 +31,9 @@ const initialState = [
             eyes: 0
         }
     }
-  ]
+]
   
-  const postsSlice = createSlice({
+const postsSlice = createSlice({
     name: 'posts',
     initialState,
     reducers: {
@@ -43,7 +43,7 @@ const initialState = [
             },
             prepare(title, content, userId) {
                 return {
-                  payload: {
+                    payload: {
                     id: nanoid(),
                     date: new Date().toISOString(),
                     title,
@@ -56,7 +56,7 @@ const initialState = [
                         rocket: 0, 
                         eyes: 0
                     }
-                  }
+                    }
                 }
             }
         },
@@ -78,8 +78,12 @@ const initialState = [
             }
         }
     }
-  })
+})
 
-  export const { postAdded, postUpdated, reactionAdded } = postsSlice.actions
-  
-  export default postsSlice.reducer
+export const { postAdded, postUpdated, reactionAdded } = postsSlice.actions
+
+export default postsSlice.reducer
+
+export const selectAllPosts = state => state.postsSlice
+
+export const selectPostById = (state, postId) => state.posts.find(post => post.id === postId)
