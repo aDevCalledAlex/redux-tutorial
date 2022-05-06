@@ -71,7 +71,7 @@ export const db = factory({
     content: String,
     reactions: oneOf('reaction'),
     comments: manyOf('comment'),
-    user: oneOf('user'),
+    author: oneOf('user'),
   },
   comment: {
     id: primaryKey(String),
@@ -102,11 +102,11 @@ const createUserData = () => {
   }
 }
 
-const createPostData = (user) => {
+const createPostData = (author) => {
   return {
     title: faker.lorem.words(),
     date: faker.date.recent(RECENT_NOTIFICATIONS_DAYS).toISOString(),
-    user,
+    author,
     content: faker.lorem.paragraphs(),
     reactions: db.reaction.create(),
   }
@@ -124,7 +124,7 @@ for (let i = 0; i < NUM_USERS; i++) {
 
 const serializePost = (post) => ({
   ...post,
-  user: post.user.id,
+  userId: post.author.id
 })
 
 /* MSW REST API Handlers */
@@ -147,8 +147,9 @@ export const handlers = [
 
     data.date = new Date().toISOString()
 
-    const user = db.user.findFirst({ where: { id: { equals: data.user } } })
-    data.user = user
+    const author = db.user.findFirst({ where: { id: { equals: data.userId } } })
+    data.author = author
+    delete data.userId
     data.reactions = db.reaction.create()
 
     const post = db.post.create(data)
@@ -294,7 +295,7 @@ function generateRandomNotifications(since, numNotifications, db) {
       id: nanoid(),
       date: faker.date.between(pastDate, now).toISOString(),
       message: template,
-      user: user.id,
+      userId: user.id,
     }
   })
 
