@@ -59,12 +59,16 @@ export const selectAllPosts = state => state.posts.posts
 
 export const selectPostById = (state, postId) => state.posts.posts.find(post => post.id === postId)
 
-export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {  
-	const response = await client.get('/fakeApi/posts')
-	return response.data
+export const fetchPosts = createAsyncThunk(
+  'posts/fetchPosts', 
+  async () => {  
+    const response = await client.get('/fakeApi/posts')
+    return response.data
 })
 
-export const addNewPost = createAsyncThunk('posts/addNewPost', async initialPost => {
+export const addNewPost = createAsyncThunk(
+  'posts/addNewPost', 
+  async initialPost => {
     // The payload creator receives the partial `{title, content, user}` object
     // We send the initial data to the fake API server
     const response = await client.post('/fakeApi/posts', initialPost)

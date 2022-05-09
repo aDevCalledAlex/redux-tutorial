@@ -35,7 +35,9 @@ export const selectAllUsers = state => state.users.users
 
 export const selectUserById = (state, userId) => state.users.users.find(user => user.id === userId)
 
-export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
-  const response = await client.get('/fakeApi/users') 
-	return response.data
+export const fetchUsers = createAsyncThunk(
+  'users/fetchUsers', 
+  async () => {
+    const response = await client.get('/fakeApi/users') 
+    return response.data
 })
