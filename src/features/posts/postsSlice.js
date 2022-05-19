@@ -61,7 +61,7 @@ export const selectPostById = (state, postId) => state.posts.posts.find(post => 
 
 export const selectPostsByUser = createSelector(
   [selectAllPosts, (state, userId) => userId],
-  (posts, userId) => posts.filter(post = post.user === userId)
+  (posts, userId) => posts.filter(post => post.user === userId)
 )
 
 export const fetchPosts = createAsyncThunk(
@@ -69,7 +69,8 @@ export const fetchPosts = createAsyncThunk(
   async () => {  
     const response = await client.get('/fakeApi/posts')
     return response.data
-})
+  }
+)
 
 export const addNewPost = createAsyncThunk(
   'posts/addNewPost', 
