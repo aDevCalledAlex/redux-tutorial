@@ -4,7 +4,7 @@ import { client } from '../../api/client'
 
 const initialState = {
   users: [],
-  state: 'idle',
+  status: 'idle',
   error: null
 }
 
