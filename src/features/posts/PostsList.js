@@ -4,11 +4,17 @@ import { Link } from 'react-router-dom'
 
 import { Spinner } from '../../components/Spinner'
 import { PostAuthor } from './PostAuthor'
-import { selectAllPosts, fetchPosts } from './postsSlice'
+import { 
+  fetchPosts,
+  selectPostIds,
+  selectPostById 
+} from './postsSlice'
 import { ReactionButtons } from './ReactionButtons'
 import { TimeAgo } from './TimeAgo'
 
-const PostExcerpt = ({ post }) => {
+const PostExcerpt = ({ postId }) => {
+  const post = useSelector(state => selectPostById(state, postId))
+
   return (
     <article className="post-excerpt" key={post.id}>
       <h3>{post.title}</h3>
@@ -26,35 +32,35 @@ const PostExcerpt = ({ post }) => {
   )
 }
 
+const getPostsListContent = ({ postIds, postStatus, error }) => {
+  if (postStatus === 'loading') return ( <Spinner text="Loading..." /> )
+  if (postStatus === 'failed') return ( <div>{error}</div> )
+  
+  return ( 
+    postIds.map(postId => (
+      <PostExcerpt key={postId} postId={postId} />
+    )) 
+  )
+}
+
 export const PostsList = () => {
   const dispatch = useDispatch()
-  const posts = useSelector(selectAllPosts)
+  const orderedPostIds = useSelector(selectPostIds)
   const postStatus = useSelector(state => state.posts.status)
   const error = useSelector(state => state.posts.error)
 
   useEffect(() => {
-    if (postStatus === 'idle') {
-      dispatch(fetchPosts())
-    }
+    if (postStatus !== 'idle') return
+    
+    dispatch(fetchPosts())
   }, [postStatus, dispatch])
 
-  let content
+  const content = getPostsListContent({
+    postIds: orderedPostIds, 
+    postStatus,
+    error
+  })
   
-  if (postStatus === 'loading') {
-    content = <Spinner text="Loading..." />
-  } else if (postStatus === 'succeeded') {
-    // Sort posts in reverse chronological order by datetime string
-    const orderedPosts = posts
-      .slice()
-      .sort((a, b) => b.date.localeCompare(a.date))
-
-    content = orderedPosts.map(post => (
-      <PostExcerpt key={post.id} post={post} />
-    ))
-  } else if (postStatus === 'failed') {
-    content = <div>{error}</div>
-  } 
-
   return (
     <section className="posts-list">
       <h2>Posts</h2>
