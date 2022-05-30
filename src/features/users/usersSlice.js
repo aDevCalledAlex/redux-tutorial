@@ -8,14 +8,12 @@ import { client } from '../../api/client'
 
 const usersAdapter = createEntityAdapter()
 
-const initialState = usersAdapter.getInitialState({
-  status: 'idle',
-  error: null
-})
-
 const usersSlice = createSlice({
   name: 'users',
-  initialState,
+  initialState : usersAdapter.getInitialState({
+    status: 'idle',
+    error: null
+  }),
   reducers: {},
   extraReducers(builder) {
     builder
@@ -26,7 +24,7 @@ const usersSlice = createSlice({
         state.status = 'succeeded'
         // Set any fetched users to the array
         const fetchedUsers = action.payload
-        usersAdapter.setAll(fetchedUsers)
+        usersAdapter.setAll(state, fetchedUsers)
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.status = 'failed'
@@ -35,13 +33,12 @@ const usersSlice = createSlice({
   }
 })
 
-export default usersSlice.reducer
-
 export const { 
   selectAll: selectAllUsers, 
-  selectById: selectUserById,
-  selectIds: selectUserIds
+  selectById: selectUserById
 } = usersAdapter.getSelectors(state => state.users)
+
+export default usersSlice.reducer
 
 export const fetchUsers = createAsyncThunk(
   'users/fetchUsers', 
