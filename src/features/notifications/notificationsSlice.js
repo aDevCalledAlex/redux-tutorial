@@ -21,7 +21,7 @@ const notificationsSlice = createSlice({
       const allNotifications = Object.values(state.entities)
       const allNotificationsSetToRead = allNotifications.map(notification => ({
         ...notification,
-        read: true
+        isRead: true
       }))
       notificationsAdapter.upsertMany(state, allNotificationsSetToRead)
     }
@@ -35,18 +35,18 @@ const notificationsSlice = createSlice({
         state.status = 'succeeded'
 
         const newNotifications = action.payload
-        const newNotificationsWithReadFlag = newNotifications.map(notification => ({
+        const newNotificationsWithIsRead = newNotifications.map(notification => ({
           ...notification,
-          read: false
+          isRead: false
         }))
         const existingNotifications = Object.values(state.entities)
-        const allNotificationsWithReadFlag = existingNotifications.concat(newNotificationsWithReadFlag)
-        const allNotificationsWithUpdatedIsNewAndReadFlag = allNotificationsWithReadFlag.map(notification => ({
+        const allNotificationsWithIsRead = existingNotifications.concat(newNotificationsWithIsRead)
+        const allNotificationsWithIsReadAndUpdatedIsNew = allNotificationsWithIsRead.map(notification => ({
           ...notification,
           // Any notifications we've read are no longer new
-          isNew: !notification.read
+          isNew: !notification.isRead
         }))
-        notificationsAdapter.upsertMany(state, allNotificationsWithUpdatedIsNewAndReadFlag)
+        notificationsAdapter.upsertMany(state, allNotificationsWithIsReadAndUpdatedIsNew)
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.status = 'failed'

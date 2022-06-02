@@ -16,7 +16,7 @@ export const NotificationsList = () => {
   const users = useSelector(selectAllUsers)
 
   useLayoutEffect(() => {
-    if (notifications && notifications.every(notification => notification.read)) return
+    if (notifications && notifications.every(notification => notification.isRead)) return
     
     dispatch(allNotificationsRead())
   })
