@@ -34,19 +34,25 @@ const notificationsSlice = createSlice({
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.status = 'succeeded'
 
-        const newNotifications = action.payload
-        const newNotificationsWithIsRead = newNotifications.map(notification => ({
-          ...notification,
-          isRead: false
-        }))
-        const existingNotifications = Object.values(state.entities)
-        const allNotificationsWithIsRead = existingNotifications.concat(newNotificationsWithIsRead)
-        const allNotificationsWithIsReadAndUpdatedIsNew = allNotificationsWithIsRead.map(notification => ({
-          ...notification,
-          // Any notifications we've read are no longer new
-          isNew: !notification.isRead
-        }))
-        notificationsAdapter.upsertMany(state, allNotificationsWithIsReadAndUpdatedIsNew)
+        notificationsAdapter.upsertMany(state, action.payload)
+        const notificationArray = Object.values(state.entities)
+        const WhosThatPokemon = notificationArray.map(notification => (
+            notification.isNew = !notification.read
+        ))
+        debugger
+        // const newNotifications = action.payload
+        // const newNotificationsWithIsRead = newNotifications.map(notification => ({
+        //   ...notification,
+        //   isRead: false
+        // }))
+        // const existingNotifications = Object.values(state.entities)
+        // const allNotificationsWithIsRead = existingNotifications.concat(newNotificationsWithIsRead)
+        // const allNotificationsWithIsReadAndUpdatedIsNew = allNotificationsWithIsRead.map(notification => ({
+        //   ...notification,
+        //   // Any notifications we've read are no longer new
+        //   isNew: !notification.isRead
+        // }))
+        // notificationsAdapter.upsertMany(state, allNotificationsWithIsReadAndUpdatedIsNew)
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.status = 'failed'
