@@ -1,37 +1,32 @@
 import React, { useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { selectAllUsers } from '../users/usersSlice'
+import { useSelector } from 'react-redux'
 
-import { addNewPost } from './postsSlice'
+import { selectAllUsers } from '../users/usersSlice'
+import { useAddNewPostMutation } from '../api/apiSlice'
 
 export const AddPostForm = () => {
-  const dispatch = useDispatch()
-
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [userId, setUserId] = useState('')
-  const [addRequestStatus, setAddRequestStatus] = useState('idle')
-
+  
+  const [addNewPost, { isLoading }] = useAddNewPostMutation()
   const users = useSelector(selectAllUsers)
 
   const onTitleChanged = e => setTitle(e.target.value)
   const onContentChanged = e => setContent(e.target.value)
   const onAuthorChanged = e => setUserId(e.target.value)
 
-  const canSave = [title, content, userId].every(Boolean) && addRequestStatus === 'idle'
+  const canSave = [title, content, userId].every(Boolean) && !isLoading
 
   const onSavePostClicked = async () => {
     if (canSave) {
       try {
-        setAddRequestStatus('pending')
-        await dispatch(addNewPost({ title, content, userId })).unwrap()
+        await addNewPost({ title, content, userId }).unwrap()
         setTitle('')
         setContent('')
         setUserId('')
-      } catch (err) {
-        console.error('Failed to save the post: ', err)
-      } finally {
-        setAddRequestStatus('idle')
+      } catch (error) {
+        console.error('Failed to save the post: ', error)
       }
     }
   }
