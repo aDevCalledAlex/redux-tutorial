@@ -1,48 +1,68 @@
 import { 
-  createSlice, 
-  createAsyncThunk,
-  createEntityAdapter
+  createEntityAdapter,
+  createSelector
 } from '@reduxjs/toolkit'
 
-import { client } from '../../api/client'
+import { apiSlice } from '../api/apiSlice'
+
+const extendedApiSlice = apiSlice.injectEndpoints({
+  endpoints: builder => ({    
+		getUsers: builder.query({      
+			query: () => '/users',
+      transformResponse: responseData => usersAdapter.setAll(initialState, responseData)  
+		})  
+	})
+})
+
+export const { getUsers } = extendedApiSlice.endpoints
 
 const usersAdapter = createEntityAdapter()
+const initialState = usersAdapter.getInitialState()
 
-const usersSlice = createSlice({
-  name: 'users',
-  initialState : usersAdapter.getInitialState({
-    status: 'idle',
-    error: null
-  }),
-  reducers: {},
-  extraReducers(builder) {
-    builder
-      .addCase(fetchUsers.pending, (state, action) => {
-        state.status = 'loading'
-      })
-      .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        // Set any fetched users to the array
-        const fetchedUsers = action.payload
-        usersAdapter.setAll(state, fetchedUsers)
-      })
-      .addCase(fetchUsers.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.error.message
-      })
+// Calling `someEndpoint.select(someArg)` generates a new selector that will return
+// the query result object for a query with those parameters.
+// To generate a selector for a specific query argument, call `select(theQueryArg)`.
+// In this case, the users query has no params, so we don't pass anything to select()
+export const selectUsersResult = apiSlice.endpoints.getUsers.select()
+
+const selectUserData = createSelector(
+  selectUsersResult,
+  usersResult => usersResult.data
+)
+
+export const selectUserMetaData = createSelector(
+  selectUsersResult,
+  usersResult => {
+    const {
+      isLoading,
+      isFetching,
+      isSuccess,
+      isError,
+      error
+    } = usersResult
+    return {
+      isLoading,
+      isFetching,
+      isSuccess,
+      isError,
+      error
+    }
   }
-})
+)
+
+// const emptyUsers = []
+
+// export const selectAllUsers = createSelector(
+//   selectUsersResult,
+//   usersResult => usersResult?.data ?? emptyUsers
+// )
+
+// export const selectUserById = createSelector(
+//   [ selectAllUsers, (_, userId) => userId ],
+//   (users, userId) => users.find(user => user.id === userId)
+// )
 
 export const { 
   selectAll: selectAllUsers, 
   selectById: selectUserById
-} = usersAdapter.getSelectors(state => state.users)
-
-export default usersSlice.reducer
-
-export const fetchUsers = createAsyncThunk(
-  'users/fetchUsers', 
-  async () => {
-    const response = await client.get('/fakeApi/users') 
-    return response.data
-})
+} = usersAdapter.getSelectors(state => selectUserData(state) ?? initialState)
